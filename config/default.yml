@@ -4,7 +4,8 @@
 
 # Default output path.
 # Placeholders: {profile}, {timestamp}, {project_name}
-output: "tmp/contextizer/{profile}_{timestamp}.md"
+#output: "tmp/contextizer/{profile}_{timestamp}.md"
+output: "{project_name}_{timestamp}.md"
 
 # Default rendering format.
 format: "markdown"
@@ -14,6 +15,7 @@ providers:
   git: true
   filesystem: true
   gems: true
+  project_info: true
   # Framework-specific providers are disabled by default.
   # They will be auto-enabled if the environment is detected.
   rails_routes: "auto"
@@ -21,6 +23,13 @@ providers:
 
 # Settings for specific providers.
 settings:
+  gems:
+    key_gems:
+      - rails
+      - devise
+      - sidekiq
+      - rspec-rails
+      - pg
   filesystem:
     # Default component definitions for a typical Ruby/Rails project.
     components:
@@ -35,6 +44,7 @@ settings:
         - "lib/**/*.rb"
         - "README.md"
         - "CHANGELOG.md"
+      documentation: "*.md"
     # Files/directories to exclude globally.
     exclude:
       - "tmp/**/*"
