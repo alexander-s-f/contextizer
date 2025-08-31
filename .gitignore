@@ -1,0 +1,15 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+# ---
+.idea
+/.idea/
+# Ignore RSpec's run status file
+.rspec_status
+# Ignore Bundler's lock file for gems
+Gemfile.lock

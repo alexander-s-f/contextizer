@@ -1,0 +1,43 @@
+# config/default.yml
+# Gem's default configuration. DO NOT EDIT.
+# Create a .contextizer.yml in your project to override.
+
+# Default output path.
+# Placeholders: {profile}, {timestamp}, {project_name}
+output: "tmp/contextizer/{profile}_{timestamp}.md"
+
+# Default rendering format.
+format: "markdown"
+
+# Provider settings.
+providers:
+  git: true
+  filesystem: true
+  gems: true
+  # Framework-specific providers are disabled by default.
+  # They will be auto-enabled if the environment is detected.
+  rails_routes: "auto"
+  rails_schema: "auto"
+
+# Settings for specific providers.
+settings:
+  filesystem:
+    # Default component definitions for a typical Ruby/Rails project.
+    components:
+      models: "app/models/**/*.rb"
+      views: "app/views/**/*.{erb,haml,slim,arb}"
+      controllers: "app/controllers/**/*.rb"
+      services: "app/services/**/*.rb"
+      lib: "lib/**/*.rb"
+      config: "config/**/*.{rb,yml}"
+      gem: # For gem development
+        - "*.gemspec"
+        - "lib/**/*.rb"
+        - "README.md"
+        - "CHANGELOG.md"
+    # Files/directories to exclude globally.
+    exclude:
+      - "tmp/**/*"
+      - "log/**/*"
+      - "node_modules/**/*"
+      - ".git/**/*"
