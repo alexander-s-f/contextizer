@@ -2,6 +2,17 @@
 
 module Contextizer
   class Collector
+    BASE_PROVIDERS = [
+      Providers::Base::ProjectName,
+      Providers::Base::Git,
+      Providers::Base::FileSystem
+    ].freeze
+
+    LANGUAGE_MODULES = {
+      ruby: Providers::Ruby,
+      javascript: Providers::JavaScript
+    }.freeze
+
     def self.call(config:, target_path:)
       new(config: config, target_path: target_path).call
     end
@@ -9,39 +20,33 @@ module Contextizer
     def initialize(config:, target_path:)
       @config = config
       @target_path = target_path
-      @context = Context.new(
-        project_name: File.basename(Dir.getwd),
-        target_path: target_path
-      )
+      @context = Context.new(target_path: target_path)
     end
 
     def call
-      puts "[Contextizer] Collector: Starting data collection..."
-
       stack = Analyzer.call(target_path: @target_path)
       @context.metadata[:stack] = stack
 
-      run_providers_from(:base)
-      run_providers_from(stack[:language]) if stack[:language] != :unknown
+      BASE_PROVIDERS.each do |provider_class|
+        provider_class.call(context: @context, config: @config)
+      end
 
+      language_module = LANGUAGE_MODULES[stack[:language]]
+      run_language_providers(language_module) if language_module
+
+      puts "Collector: Collection complete. Found #{@context.files.count} files."
       @context
     end
 
     private
 
-    def run_providers_from(strategy_name)
-      strategy_module_name = strategy_name.to_s.capitalize
-
-      begin
-        strategy_module = Providers.const_get(strategy_module_name)
-        strategy_module.constants.each do |const_name|
-          provider_class = strategy_module.const_get(const_name)
-          if provider_class.is_a?(Class) && provider_class < Contextizer::Providers::BaseProvider
-            provider_class.call(context: @context, config: @config)
-          end
+    def run_language_providers(language_module)
+      puts "Collector: Running '#{language_module.name.split('::').last}' providers..."
+      language_module.constants.each do |const_name|
+        provider_class = language_module.const_get(const_name)
+        if provider_class.is_a?(Class) && provider_class < Providers::BaseProvider
+          provider_class.call(context: @context, config: @config)
         end
-      rescue NameError => e
-        puts "[Contextizer] Warning: No providers found for strategy '#{strategy_name}'. #{e.message}"
       end
     end
   end

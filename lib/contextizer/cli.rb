@@ -6,6 +6,9 @@ require "yaml"
 module Contextizer
   class CLI < Thor
     desc "extract [TARGET_PATH]", "Extracts project context into a single file."
+    option :git_url,
+           type: :string,
+           desc: "URL of a remote git repository to analyze instead of a local path."
     option :output,
            aliases: "-o",
            type: :string,
@@ -20,15 +23,25 @@ module Contextizer
     }.freeze
 
     def extract(target_path = ".")
+      if options[:git_url]
+        RemoteRepoHandler.handle(options[:git_url]) do |remote_path|
+          run_extraction(remote_path)
+        end
+      else
+        run_extraction(target_path)
+      end
+    end
+
+    private
+
+    def run_extraction(path)
       cli_options = options.transform_keys(&:to_s).compact
       config = Configuration.load(cli_options)
 
-      context = Collector.call(config: config, target_path: target_path)
+      context = Collector.call(config: config, target_path: path)
 
       renderer = RENDERER_MAPPING[config.format]
-      unless renderer
-        raise Error, "Unsupported format: '#{config.format}'. Supported formats: #{RENDERER_MAPPING.keys.join(', ')}"
-      end
+      raise Error, "Unsupported format: '#{config.format}'" unless renderer
 
       rendered_output = renderer.call(context: context)
 
@@ -37,8 +50,6 @@ module Contextizer
 
       puts "\nContextizer: Extraction complete! ✨"
     end
-
-    private
 
     def resolve_output_path(path_template, context)
       timestamp = Time.now.strftime("%Y-%m-%d_%H%M")

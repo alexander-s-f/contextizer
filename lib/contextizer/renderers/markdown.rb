@@ -26,6 +26,9 @@ module Contextizer
         git_info = @context.metadata[:git] || {}
         gem_info = (@context.metadata[:gems] || {}).map { |n, v| "- **#{n}:** #{v}" }.join("\n")
 
+        packages = @context.metadata[:packages] || {}
+        pkg_info = (packages[:dependencies] || {}).map { |n, v| "- **#{n}:** #{v}" }.join("\n")
+
         <<~HEADER
           # Contextizer Report
 
@@ -39,8 +42,11 @@ module Contextizer
           - **Branch:** `#{git_info[:branch]}`
           - **Commit:** `#{git_info[:commit]}`
 
-          ### Key Dependencies
+          ### Key Ruby Dependencies
           #{gem_info.empty? ? "Not found." : gem_info}
+
+          ### Key JS Dependencies
+          #{pkg_info.empty? ? "Not found." : pkg_info}
         HEADER
       end
 

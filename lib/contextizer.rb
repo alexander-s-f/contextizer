@@ -3,7 +3,8 @@
 require "zeitwerk"
 loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect(
-  "cli" => "CLI"
+  "cli" => "CLI",
+  "javascript" => "JavaScript",
 )
 loader.setup
 
