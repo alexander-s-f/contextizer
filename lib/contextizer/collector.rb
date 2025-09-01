@@ -13,14 +13,18 @@ module Contextizer
       javascript: Providers::JavaScript
     }.freeze
 
-    def self.call(config:, target_path:)
-      new(config: config, target_path: target_path).call
+    def self.call(config:, target_path:, command:)
+      new(config: config, target_path: target_path, command: command).call
     end
 
-    def initialize(config:, target_path:)
+    def initialize(config:, target_path:, command:)
       @config = config
       @target_path = target_path
-      @context = Context.new(target_path: target_path)
+      @command = command
+      @context = Context.new(
+        target_path: target_path,
+        command: @command
+      )
     end
 
     def call

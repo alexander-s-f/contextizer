@@ -38,6 +38,11 @@ module Contextizer
           - **Version:** #{project_info[:version]}
           - **Extracted At:** #{@context.timestamp}
 
+          ### Command
+          ```bash
+          #{@context.command}
+          ```
+
           ### Git Info
           - **Branch:** `#{git_info[:branch]}`
           - **Commit:** `#{git_info[:commit]}`

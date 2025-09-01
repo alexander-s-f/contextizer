@@ -7,6 +7,7 @@ module Contextizer
     :project_name,
     :target_path,
     :timestamp,
+    :command,
     :metadata,     # Hash for data from providers like Git, Gems, etc.
     :files,        # Array of file objects { path:, content: }
     keyword_init: true

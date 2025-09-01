@@ -38,7 +38,12 @@ module Contextizer
       cli_options = options.transform_keys(&:to_s).compact
       config = Configuration.load(cli_options)
 
-      context = Collector.call(config: config, target_path: path)
+      command_string = "contextizer #{ARGV.join(" ")}"
+      context = Collector.call(
+        config: config,
+        target_path: path,
+        command: command_string
+      )
 
       renderer = RENDERER_MAPPING[config.format]
       raise Error, "Unsupported format: '#{config.format}'" unless renderer

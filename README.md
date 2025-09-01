@@ -8,7 +8,6 @@ It's the perfect tool for:
 -   Archiving a project snapshot for a code review.
 -   Creating comprehensive bug reports.
 
----
 
 ## Key Features
 
@@ -19,7 +18,6 @@ It's the perfect tool for:
 * **Flexible Configuration:** Controlled via a simple YAML file (`.contextizer.yml`) in your project's root, allowing you to fine-tune the data collection process.
 * **Clean & Readable Reports:** Generates a single Markdown file with a visual file tree, project metadata, and syntax-highlighted source code.
 
----
 
 ## Installation
 
@@ -48,8 +46,6 @@ Then, execute:
 bundle install
 ```
 
----
-
 ## Usage
 
 ### Analyzing a Local Project
@@ -77,9 +73,7 @@ contextizer extract --git-url https://github.com/rails/rails
 - `-o, --output PATH`: The destination path for the final report file.
 - `-f, --format FORMAT`: The output format (currently supports `markdown`).
 
----
-
-## ⚙️ Configuration
+## Configuration
 
 To customize Contextizer for your project, create a `.contextizer.yml` file in its root directory.
 
@@ -91,7 +85,7 @@ CLI Options > .contextizer.yml > Gem Defaults
 
 YAML
 
-```
+```yml
 # .contextizer.yml
 
 # Path to save the report.
@@ -134,8 +128,6 @@ settings:
       - "vendor/**/*"
 ```
 
----
-
 ## Extensibility (Adding a New Language)
 
 Thanks to the plug-and-play architecture, adding support for a new language is straightforward:
@@ -144,8 +136,6 @@ Thanks to the plug-and-play architecture, adding support for a new language is s
 2. **Create Providers**: Add a new directory in `lib/contextizer/providers/` with providers that extract language-specific information (e.g., dependencies from a `pom.xml` file for Java).
 
 The main `Analyzer` and `Collector` will automatically discover and use your new components.
-
----
 
 ## Contributing
 
