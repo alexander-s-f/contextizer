@@ -2,13 +2,6 @@
 
 module Contextizer
   class Collector
-    PROVIDER_MAPPING = {
-      "project_info" => Providers::ProjectInfo,
-      "git" => Providers::Git,
-      "gems" => Providers::Gems,
-      "filesystem" => Providers::FileSystem
-    }.freeze
-
     def self.call(config:, target_path:)
       new(config: config, target_path: target_path).call
     end
@@ -23,21 +16,33 @@ module Contextizer
     end
 
     def call
-      enabled_providers.each do |provider_class|
-        provider_class.call(context: @context, config: @config)
-      end
+      puts "[Contextizer] Collector: Starting data collection..."
 
-      puts "Collector: Collection complete. Found #{@context.files.count} files."
+      stack = Analyzer.call(target_path: @target_path)
+      @context.metadata[:stack] = stack
+
+      run_providers_from(:base)
+      run_providers_from(stack[:language]) if stack[:language] != :unknown
 
       @context
     end
 
     private
 
-    def enabled_providers
-      @config.providers.map do |key, enabled|
-        PROVIDER_MAPPING[key] if enabled == true
-      end.compact
+    def run_providers_from(strategy_name)
+      strategy_module_name = strategy_name.to_s.capitalize
+
+      begin
+        strategy_module = Providers.const_get(strategy_module_name)
+        strategy_module.constants.each do |const_name|
+          provider_class = strategy_module.const_get(const_name)
+          if provider_class.is_a?(Class) && provider_class < Contextizer::Providers::BaseProvider
+            provider_class.call(context: @context, config: @config)
+          end
+        end
+      rescue NameError => e
+        puts "[Contextizer] Warning: No providers found for strategy '#{strategy_name}'. #{e.message}"
+      end
     end
   end
 end

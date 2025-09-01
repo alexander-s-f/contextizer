@@ -2,7 +2,7 @@
 
 module Contextizer
   module Providers
-    class Base
+    class BaseProvider
       # @param context [Contextizer::Context] The context object to be populated.
       # @param config [Contextizer::Configuration] The overall configuration.
       def self.call(context:, config:)

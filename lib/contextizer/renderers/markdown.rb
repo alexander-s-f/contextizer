@@ -45,16 +45,46 @@ module Contextizer
       end
 
       def render_file_tree
-        paths = @context.files.map { |f| "- `#{f[:path]}`" }.join("\n")
+        paths = @context.files.map { |f| f[:path] }
+        tree_hash = build_path_hash(paths)
+        tree_string = format_tree_node(tree_hash).join("\n")
+
         <<~TREE
           ### File Structure
           <details>
-          <summary>Click to view file list</summary>
+          <summary>Click to view file tree</summary>
 
-          #{paths}
+          ```text
+          #{@context.project_name}/
+          #{tree_string}
+          ```
 
           </details>
         TREE
+      end
+
+      def build_path_hash(paths)
+        paths.each_with_object({}) do |path, hash|
+          path.split("/").reduce(hash) do |level, part|
+            level[part] ||= {}
+          end
+        end
+      end
+
+      def format_tree_node(node, prefix = "")
+        output = []
+        children = node.keys.sort
+        children.each_with_index do |key, index|
+          is_last = (index == children.length - 1)
+          connector = is_last ? "└── " : "├── "
+          output << "#{prefix}#{connector}#{key}"
+
+          if node[key].any?
+            new_prefix = prefix + (is_last ? "    " : "│   ")
+            output.concat(format_tree_node(node[key], new_prefix))
+          end
+        end
+        output
       end
 
       def render_files
