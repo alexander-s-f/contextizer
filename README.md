@@ -1,43 +1,163 @@
 # Contextizer
 
-TODO: Delete this and the text below, and describe your gem
+**Contextizer** is a versatile command-line tool for extracting, analyzing, and packaging the context of any software project. It scans a codebase, gathers key metadata (language, framework, dependencies, git status), and aggregates the source code into a single, easy-to-digest Markdown report.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/contextizer`. To experiment with that code, run `bin/console` for an interactive prompt.
+It's the perfect tool for:
+-   Preparing context for analysis by Large Language Models (LLMs).
+-   Quickly onboarding a new developer to a project.
+-   Archiving a project snapshot for a code review.
+-   Creating comprehensive bug reports.
+
+---
+
+## Key Features
+
+* **Polyglot by Design:** Automatically detects a project's primary language and framework (Ruby/Rails, JavaScript, etc.) using a smart "signals and weights" system.
+* **Plug-and-Play Architecture:** Easily extendable to support new languages and frameworks by adding new "Analyzers" and "Providers".
+* **Rich Metadata Collection:** Extracts Git information (branch, commit), key dependencies (`Gemfile`, `package.json`), and the project's structure.
+* **Remote Repository Analysis:** Can clone and analyze any public Git repository directly from a URL, no manual cloning required.
+* **Flexible Configuration:** Controlled via a simple YAML file (`.contextizer.yml`) in your project's root, allowing you to fine-tune the data collection process.
+* **Clean & Readable Reports:** Generates a single Markdown file with a visual file tree, project metadata, and syntax-highlighted source code.
+
+---
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+### Standalone (Recommended)
 
-Install the gem and add to the application's Gemfile by executing:
-
-```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
-```
-
-If bundler is not being used to manage dependencies, install the gem by executing:
+Install the gem globally to use it in any project on your system:
 
 ```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+gem install contextizer
 ```
+
+### As a Project Dependency (Bundler)
+
+Add it to your project's `Gemfile` within the `:development` group:
+
+```ruby
+# Gemfile
+group :development do
+  gem 'contextizer'
+end
+```
+
+Then, execute:
+
+```bash
+bundle install
+```
+
+---
 
 ## Usage
 
-TODO: Write usage instructions here
+### Analyzing a Local Project
 
-## Development
+Navigate to your project's root directory and run:
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+```bash
+contextizer extract
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+The report will be saved in the current directory by default.
+
+### Analyzing a Remote Git Repository
+
+Use the `--git-url` option to analyze any public repository:
+
+```bash
+contextizer extract --git-url https://github.com/rails/rails
+```
+
+### Common Options
+
+- `[TARGET_PATH]`: (Optional) The path to the directory to analyze. Defaults to the current directory.
+- `--git-url URL`: The URL of a remote Git repository to analyze.
+- `-o, --output PATH`: The destination path for the final report file.
+- `-f, --format FORMAT`: The output format (currently supports `markdown`).
+
+---
+
+## ⚙️ Configuration
+
+To customize Contextizer for your project, create a `.contextizer.yml` file in its root directory.
+
+The tool uses a three-tiered configuration system with the following priority:
+
+CLI Options > .contextizer.yml > Gem Defaults
+
+### Example `.contextizer.yml`
+
+YAML
+
+```
+# .contextizer.yml
+
+# Path to save the report.
+# Available placeholders: {project_name}, {timestamp}
+output: "docs/context/{project_name}_{timestamp}.md"
+
+# Settings for specific providers
+settings:
+  # Settings for the Ruby gems provider
+  gems:
+    key_gems: # List your project's most important gems here
+      - rails
+      - devise
+      - sidekiq
+      - rspec-rails
+      - pg
+      - pundit
+
+  # Settings for the filesystem provider
+  filesystem:
+    # Specify which files and directories to include in the report
+    components:
+      models: "app/models/**/*.rb"
+      controllers: "app/controllers/**/*.rb"
+      services: "app/services/**/*.rb"
+      javascript: "app/javascript/**/*.js"
+      config:
+        - "config/routes.rb"
+        - "config/application.rb"
+      documentation:
+        - "README.md"
+        - "CONTRIBUTING.md"
+
+    # Global exclusion patterns
+    exclude:
+      - "tmp/**/*"
+      - "log/**/*"
+      - "node_modules/**/*"
+      - ".git/**/*"
+      - "vendor/**/*"
+```
+
+---
+
+## Extensibility (Adding a New Language)
+
+Thanks to the plug-and-play architecture, adding support for a new language is straightforward:
+
+1. **Create a Specialist Analyzer**: Add a new file in `lib/contextizer/analyzers/` that detects the language based on its characteristic files and directories.
+2. **Create Providers**: Add a new directory in `lib/contextizer/providers/` with providers that extract language-specific information (e.g., dependencies from a `pom.xml` file for Java).
+
+The main `Analyzer` and `Collector` will automatically discover and use your new components.
+
+---
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/contextizer. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/contextizer/blob/master/CODE_OF_CONDUCT.md).
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b my-new-feature`).
+3. Commit your changes (`git commit -am 'Add some feature'`).
+4. Push to the branch (`git push origin my-new-feature`).
+5. Create a new Pull Request.
+
+
+---
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-## Code of Conduct
-
-Everyone interacting in the Contextizer project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/contextizer/blob/master/CODE_OF_CONDUCT.md).
+This project is released under the MIT License.
